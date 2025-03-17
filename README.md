@@ -90,3 +90,6 @@ contract DecentralizedMarketplace {
         emit ReviewAdded(serviceId, msg.sender, rating, comment);
     }
 }
+
+![image](https://github.com/user-attachments/assets/404c991d-9348-4c22-a008-71d160fef24c)
+
