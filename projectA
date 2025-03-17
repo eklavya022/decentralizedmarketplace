@@ -1,0 +1,60 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.9;
+
+contract DecentralizedMarketplace {
+    struct Service {
+        uint256 id;
+        address freelancer;
+        string description;
+        uint256 price;
+        bool available;
+    }
+
+    struct Review {
+        address reviewer;
+        uint8 rating;
+        string comment;
+    }
+
+    uint256 private nextServiceId;
+    mapping(uint256 => Service) public services;
+    mapping(uint256 => Review[]) public serviceReviews;
+    mapping(address => uint256[]) public freelancerServices;
+
+    event ServiceListed(uint256 indexed id, address indexed freelancer, string description, uint256 price);
+    event ServicePurchased(uint256 indexed id, address indexed buyer, uint256 price);
+    event ServiceCompleted(uint256 indexed id, address indexed freelancer, address indexed buyer);
+    event ReviewAdded(uint256 indexed serviceId, address indexed reviewer, uint8 rating, string comment);
+
+    function listService(string memory description, uint256 price) external {
+        require(price > 0, "Price must be greater than zero");
+        services[nextServiceId] = Service(nextServiceId, msg.sender, description, price, true);
+        freelancerServices[msg.sender].push(nextServiceId);
+        emit ServiceListed(nextServiceId, msg.sender, description, price);
+        nextServiceId++;
+    }
+
+    function purchaseService(uint256 id) external payable {
+        Service storage service = services[id];
+        require(service.available, "Service not available");
+        require(msg.value == service.price, "Incorrect price");
+
+        payable(service.freelancer).transfer(msg.value);
+        service.available = false;
+        emit ServicePurchased(id, msg.sender, service.price);
+    }
+
+    function completeService(uint256 id) external {
+        Service storage service = services[id];
+        require(service.available == false, "Service not yet purchased");
+        require(service.freelancer == msg.sender, "Only the freelancer can mark service as completed");
+
+        emit ServiceCompleted(id, service.freelancer, msg.sender);
+    }
+
+    function addReview(uint256 serviceId, uint8 rating, string memory comment) external {
+        require(rating >= 1 && rating <= 5, "Rating must be between 1 and 5");
+        serviceReviews[serviceId].push(Review(msg.sender, rating, comment));
+        emit ReviewAdded(serviceId, msg.sender, rating, comment);
+    }
+}
