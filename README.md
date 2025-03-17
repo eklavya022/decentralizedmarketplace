@@ -90,6 +90,7 @@ contract DecentralizedMarketplace {
         emit ReviewAdded(serviceId, msg.sender, rating, comment);
     }
 }
-
+## Contract Address 
+0x81bEE81C57E398524b280B8Df98f20FFcA032328
 ![image](https://github.com/user-attachments/assets/404c991d-9348-4c22-a008-71d160fef24c)
 
